@@ -401,8 +401,20 @@ class DspamClient(object):
                 try:
                     self._recipients.remove(rcpt)
                 except ValueError:
-                    raise DspamClientError(
-                        'Message was accepted for unknown recipient ' + rcpt)
+                    # It might be that the accepted recipient *is* in the list,
+                    # but has a different case. Let's look for that
+                    for r in self._recipients:
+                        if r.lower() == rcpt.lower():
+                            try:
+                                self._recipients.remove(r)
+                            except ValueError:
+                                raise DspamClientError(
+                                    'Message was accepted for unknown recipient ' + rcpt)
+                            break
+                    else:
+                        # Fell off the end of the loop without finding a match
+                        raise DspamClientError(
+                            'Message was accepted for unknown recipient ' + rcpt)
                 self.results[rcpt] = {'accepted': True}
                 logger.debug(
                     'Message accepted for recipient {} in LMTP mode'.format(
