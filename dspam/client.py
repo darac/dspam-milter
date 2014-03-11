@@ -404,12 +404,13 @@ class DspamClient(object):
                     # It might be that the accepted recipient *is* in the list,
                     # but has a different case. Let's look for that
                     for r in self._recipients:
+                        logger.debug('Case-checking recipient {} == {}'.format(r, rcpt))
                         if r.lower() == rcpt.lower():
                             try:
                                 self._recipients.remove(r)
                             except ValueError:
                                 raise DspamClientError(
-                                    'Message was accepted for unknown recipient ' + rcpt)
+                                    'Message was accepted for unknown recipient {} ({})'.format(r,rcpt))
                             break
                     else:
                         # Fell off the end of the loop without finding a match
@@ -438,9 +439,21 @@ class DspamClient(object):
                 try:
                     self._recipients.remove(rcpt)
                 except ValueError:
-                    raise DspamClientError(
-                        'Message was accepted for unknown '
-                        'recipient {}'.format(rcpt))
+                    # It might be that the accepted recipient *is* in the list,
+                    # but has a different case. Let's look for that
+                    for r in self._recipients:
+                        logger.debug('Case-checking recipient {} == {}'.format(r, rcpt))
+                        if r.lower() == rcpt.lower():
+                            try:
+                                self._recipients.remove(r)
+                            except ValueError:
+                                raise DspamClientError(
+                                    'Message was accepted for unknown recipient {} ({})'.format(r,rcpt))
+                            break
+                    else:
+                        # Fell off the end of the loop without finding a match
+                        raise DspamClientError(
+                            'Message was accepted for unknown recipient ' + rcpt)
 
                 # map results to their DSPAM classification result names
                 fields = ('user', 'result', 'class',
