@@ -1,0 +1,13 @@
+[Unit]
+Description=DSpam Milter Interface
+Documentation=https://github.com/whyscream/dspam-milter/blob/master/README.rst
+Wants=dspam.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/dspam-milter --config /etc/dspam-milter.cfg
+User=dspam
+Group=dspam
+
+[Install]
+WantedBy=multi-user.target
